@@ -1,52 +1,125 @@
-Patches in with-linux-3.4
-=========================
+DreamPlug uap8xxx WiFi Access Point Kernel Module Patches for Linux 3.2 (wheezy)
+================================================================================
 
-These patches were adapted to apply on Linux 3.4 from the ones found here:
+This repository is forked from:
+
+https://github.com/bauermann/dreamplug
+
+The patches were "originally" grabbed from:
 
 http://sheeva.with-linux.com/sheeva/kernel/3/3.2/3.2.9/source/
 
-They assume the Dreamplug has the original u-boot shipped by Marvel. This
-means that the kernel will expect it to report the Guruplug machine id
-2659 instead of the official 3550, and it assumes u-boot doesn't provide
-a flattened device tree. If your u-boot uses the Dreamplug id then you
-can just remove the section about linux-3.4/arch/arm/tools/mach-types
-from dreamplug-3.4.0.patch. If it also provides a flattened device tree,
-then you don't need dreamplug-3.4.0.patch at all.
+It looks like mvsdio-1-2.6.30.patch was edited in bauermann's version; i've
+included the larger original for comparison.
 
-Using the kernel patches
-------------------------
+I made one more small but questionable tweak to get things to compile:
+commenting out line 74 of libertas_uap/uap_debug.c.
 
-Instructions based on freedom-maker's README [1].
+This repo is modeled on bauermann's 3.4 kernel patches, only "re-backported" to
+contain older patches in a simple form for use compiling just the uap8xxx.ko
+kernel module for the version 3.2.9 kernel that seems to be the stable release
+version for debian wheezy.
 
-To compile your own kernel, you can use config-3.4.0-1bauer2-kirkwood as basis.
-Follow the following steps on the DreamPlug to compile a new kernel:
+This is all a horrible short-term kludge. Preferably the libertas_uap/uap8xxx
+code should get added to the kernel mainline, or at least be distributed in a
+coherent fashion... but I am not that hero.
 
-  1. Get the kernel source and other needed packages.
-    # apt-get kernel-package lzma quilt
-  2. Get the Linux 3.4 kernel.
-    # wget https://www.kernel.org/pub/linux/kernel/v3.0/linux-3.4.tar.bz2
-  2. Unpack it somewhere.
-    # tar xfj linux-3.4.tar.bz2
-  3. Apply the patches found in with-linux-3.4.
-    # cd linux-3.4
-    # ln -s ../with-linux-3.4 patches
-    # quilt push -a
-  4. Copy the config and compile.
-    # cp ../config-3.4.0-1bauer2-kirkwood .config
-    # make-kpkg clean
-    # make-kpkg --append-to-version -1bauer2-kirkwood --revision=3.4.0-1bauer2 --initrd --cross_compile=- kernel_image kernel_headers
-  5. Install the packages.
-    # dpkg -i ../linux-{image,headers}-3.4.0-1bauer2-kirkwood_3.4.0-1bauer2_armel.deb
+Quick Binary Install
+--------------------
 
-After kernel is installed on device, hooks should be calling:
-    # flash-kernel 3.4.0-1bauer2-kirkwood
+If you have a dreamplug running the exact linux 3.2.9 kirkwood kernel that came
+with debian wheezy or FreedomBox (as of Aug 22, 2012), you can just install the
+uap8xxx.ko-3.2.9-kirkwood, firmware, and a modprobe file and you are good to
+go... scp them to the device and then:
 
-After that you should get a uImage and uInitrd files under /boot.
+    # # as root
+    # mkdir /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
+    # cp uap8xxx.ko-3.2.9-kirkwood /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
+    # depmod -a
+    # cp -r firmware/mrvl /lib/firmware/mrvl
+    # cp modprobe_libertas_uap.conf /etc/modprobe.d/libertas_uap
+    # reboot
 
-These packages should get a kernel up and running into DreamPlug device.
-The compilation process takes 6 hours on the DreamPlug. You will need
-approximately 1 GB of free space for the build (including the size of the
-unpacked kernel source).
+Extracting kernel module source (on any machine)
+------------------------------------------------
 
--- 
-[1] http://anonscm.debian.org/git/freedombox/freedom-maker.git/
+This explains the steps I took to extract out the uap8xxx ("libertas_uap")
+module code. These are now in the libertas_uap folder in this repo, so you
+don't need to repeate these steps.
+
+1. Get the kernel source and other needed packages.
+  # apt-get lzma quilt
+2. Get the Linux 3.4 kernel.
+  # wget http://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.9.tar.xz
+2. Unpack it somewhere.
+  # tar xvf linux-3.2.9.tar.bz2
+3. Apply the patches found in with-linux-3.2.
+  # cd linux-3.2.9
+  # ln -s ../with-linux-3.2 patches
+  # quilt push -a
+4. Copy out the module sources
+  # cp -r drivers/net/wireless/libertas_uap/ ../libertas_uap
+
+This source didn't compile for me as-is; I blindly commented out line 74 of
+uap_debug.c, which is a horrible hack and might result in kernel crashes down
+the line.
+
+Compiling uap8xxx.ko module (on DreamPlug)
+------------------------------------------
+
+These instructions based on an old mailing list post by Daniel Gillmor [1].
+
+Generate a tarball of the libertas_uap files extracted above (or found in the
+./libertas_uap folder of this repo):
+
+    # tar -cf tar -cf libertas_uap.tar libertas_uap
+    # gzip libertas_uap.tar
+
+Copy that tarball over to a DreamPlug running a linux 3.2 kernel (only tested
+with the debian wheezy 3.2.9 kernel) and install build requirements (slow!):
+
+    # apt-get update
+    # apt-get install module-assistant vim screen linux-headers-kirkwood
+
+As any user, extract the source and build it:
+
+    $ tar xzf libertas_uap.tar.gz
+    $ cd libertas_uap
+    $ make CONFIG_LIBERTAS_UAP=m -C /lib/modules/$(uname -r)/build M=$(pwd)
+
+This compiles pretty quickly for me, even on the DreamPlug. If that worked out,
+install the results as root:
+
+    # mkdir /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
+    # cp uap8xxx.ko /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
+    # depmod -a
+
+If you don't already have them installed, copy over the ./firmware/mrvl .bin
+files and install as root:
+
+    # cp -r firmware/mrvl /lib/firmware/mrvl
+
+To prevent block the libertas_sdio driver from glomming on to the hardware
+before uap8xxx can get to it, blacklist the other drivers by adding this file
+as /etc/modprobe.d/libertas_uap.conf (or just copy modprobe_libertas_uap.conf
+from this repo):
+
+    # blacklist competing modules for the same hardware
+    # used by libertas_uap (uap8xxx.ko)
+    blacklist libertas_sdio
+    blacklist libertas
+
+At this point I did a cold reboot (shutdown and disconnect power), though you
+might be able to just modprobe following Dan's instructions:
+
+    root@moo:~# ip link show uap0
+    Device "uap0" does not exist.
+    root@moo:~# modprobe -v uap8xxx
+    insmod /lib/modules/2.6.32-5-kirkwood/kernel/drivers/net/wireless/libertas_uap/uap8xxx.ko
+    root@moo:~# ip link show uap0
+    4: uap0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN qlen 1000
+        link/ether 00:24:23:YY:WW:ZZ brd ff:ff:ff:ff:ff:ff
+
+Horray!
+
+[1] http://lists.debian.org/debian-arm/2010/05/msg00081.html

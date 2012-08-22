@@ -1,0 +1,7 @@
+Frankly, all these files are a disappointing shit-show w/r/t attribution.
+
+The ./firmware/mrvl/ files were floating around on my DreamPlug and probably
+came from 
+
+The ./with-linux-3.2 patches are from http://www.xilka.com/, but have no
+license and I don't know where they came from originally. Presumably GPL.
