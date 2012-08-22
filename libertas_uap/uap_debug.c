@@ -71,7 +71,19 @@ static struct debug_data items[] = {
     {"ps_state", item_size(ps_state), 0, item_addr(ps_state),
      OFFSET_UAP_ADAPTER},
 #ifdef DEBUG_LEVEL1
+/*
+ * XXX: bnewbold: HORRIBLE HACK here, blindly commenting this line out to avoid
+ * gcc error:
+ *
+ * uap_debug.c:77:5: error: initializer element is not constant
+ * uap_debug.c:77:5: error: (near initialization for ‘items[8].addr’)
+ *
+ * Not sure why a pointer to an extern integer is not sufficiently constant;
+ * don't know what the side-effects of commenting this out may be.
+ */
+/*
     {"drvdbg", sizeof(drvdbg), (u32) & drvdbg, 0, 0}
+*/
 #endif
 };
 
