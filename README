@@ -48,7 +48,7 @@ module code. These are now in the libertas_uap folder in this repo, so you
 don't need to repeate these steps.
 
 1. Get the kernel source and other needed packages.
-  # apt-get lzma quilt
+  # apt-get install lzma quilt
 2. Get the Linux 3.4 kernel.
   # wget http://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.9.tar.xz
 2. Unpack it somewhere.
@@ -79,7 +79,7 @@ Copy that tarball over to a DreamPlug running a linux 3.2 kernel (only tested
 with the debian wheezy 3.2.9 kernel) and install build requirements (slow!):
 
     # apt-get update
-    # apt-get install module-assistant vim screen linux-headers-kirkwood
+    # apt-get install module-assistant linux-headers-kirkwood build-essentials
 
 As any user, extract the source and build it:
 
