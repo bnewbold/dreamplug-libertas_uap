@@ -24,6 +24,11 @@ This is all a horrible short-term kludge. Preferably the libertas_uap/uap8xxx
 code should get added to the kernel mainline, or at least be distributed in a
 coherent fashion... but I am not that hero.
 
+Note: by default *any* user can access and modify all settings via the uaputl
+mechanism:
+
+http://lists.debian.org/debian-arm/2010/05/msg00082.html
+
 Quick Binary Install
 --------------------
 
@@ -79,7 +84,7 @@ Copy that tarball over to a DreamPlug running a linux 3.2 kernel (only tested
 with the debian wheezy 3.2.9 kernel) and install build requirements (slow!):
 
     # apt-get update
-    # apt-get install module-assistant linux-headers-kirkwood build-essentials
+    # apt-get install module-assistant linux-headers-kirkwood build-essential
 
 As any user, extract the source and build it:
 
@@ -91,7 +96,7 @@ This compiles pretty quickly for me, even on the DreamPlug. If that worked out,
 install the results as root:
 
     # mkdir /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
-    # cp uap8xxx.ko /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
+    # cp uap8xxx.ko /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap/uap8xxx.ko
     # depmod -a
 
 If you don't already have them installed, copy over the ./firmware/mrvl .bin
