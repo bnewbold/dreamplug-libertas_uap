@@ -15,8 +15,8 @@ git clone --depth 1 http://github.com/bnewbold/dreamplug-libertas_uap /tmp/dpla
 cd /tmp/dpla
 
 echo "installing..."
-mkdir -v /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
-cp -v uap8xxx.ko-3.2.9-kirkwood /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
+mkdir -pv /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
+cp -v uap8xxx.ko-3.2.9-kirkwood /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap/uap8xxx.ko
 depmod -a
 cp -vr firmware/mrvl /lib/firmware/mrvl
 cp -v modprobe_libertas_uap.conf /etc/modprobe.d/libertas_uap

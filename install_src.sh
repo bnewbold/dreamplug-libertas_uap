@@ -16,7 +16,7 @@ make CONFIG_LIBERTAS_UAP=m -C /lib/modules/$(uname -r)/build M=$(pwd)
 
 echo "installing..."
 mkdir -pv /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
-cp -v uap8xxx.ko /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap
+cp -v uap8xxx.ko /lib/modules/$(uname -r)/kernel/drivers/net/wireless/libertas_uap/uap8xxx.ko
 depmod -a
 cd ..
 cp -vr firmware/mrvl /lib/firmware/mrvl
